@@ -5,7 +5,7 @@ This is a simple snakemake pipeline to predict gene models from genomic DNA (FAS
 
 First, you will need to clone this repo.
 
-$ git clone 
+$ git clone git@github.com:hsiehph/Transcript2GeneModel.git
 
 The config.yaml must contain correct paths to the files for transcripts and FASTA sequences. </br>
 
