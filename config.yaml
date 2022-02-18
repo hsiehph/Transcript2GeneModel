@@ -1,0 +1,5 @@
+---
+transcript: inputs/predicted_mRNA_MUC5AC.fa
+Haplo:
+    CHM13:  inputs/T2T_MUC5AC.fa
+    HG00733_2:  inputs/HG00733_2_MUC5AC.fa

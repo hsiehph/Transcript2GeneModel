@@ -1,0 +1,135 @@
+
+shell.prefix("source config.sh; set -eo pipefail ; ")
+
+configfile: "config.yaml"
+
+if not os.path.exists("log"):
+	os.makedirs("log")
+
+
+def _getHaplo(wildcards):
+	return config["Haplo"][wildcards.haplo]
+
+
+
+rule all:
+	input: expand("output/{haplo}/{haplo}.tsv.ORFs.final.cds.bam.bed", haplo=config["Haplo"].keys())
+
+
+
+rule bam2bed:
+	input: "output/{haplo}/{haplo}.tsv.ORFs.final.cds.bam.bai",
+			"output/{haplo}/{haplo}.tsv.ORFs.final.cds.bam"
+	output: "output/{haplo}/{haplo}.tsv.ORFs.final.cds.bam.bed"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""
+				bedtools bamtobed -split -i {input[1]} > {output}
+			"""   
+	
+
+rule indexBamORF:
+	input: "output/{haplo}/{haplo}.tsv.ORFs.final.cds.bam"
+	output: "output/{haplo}/{haplo}.tsv.ORFs.final.cds.bam.bai"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""
+				samtools index {input}
+			"""   
+
+
+rule mapORF:
+	input: haplotype = _getHaplo,
+			cds = "output/{haplo}/{haplo}.tsv.ORFs.final.cds"
+	output: "output/{haplo}/{haplo}.tsv.ORFs.final.cds.bam"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""   
+				minimap2 -H -ax splice -uf -C5 -f 1000 -N 50 -p 0.5 --eqx -Y -K 100M {input.haplotype} {input.cds} |  samtools view -Sb - | samtools sort - > output/{wildcards.haplo}/{wildcards.haplo}.tsv.ORFs.final.cds.bam
+			"""
+
+
+rule angel:
+	input: "output/{haplo}/{haplo}.tsv.fasta"
+	output: "output/{haplo}/{haplo}.tsv.ORFs.final.cds"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+		"""
+			source activate /net/eichler/vol27/projects/human_diversity/nobackups/hsiehph/miniconda/envs/anaCogent  &&  python scripts/dumb_predict.py --use_rev_strand  --cpus $(nproc)  --min_aa_length 100  {input}  output/{wildcards.haplo}/{wildcards.haplo}.tsv.ORFs 
+		"""
+
+
+rule tsv2fasta:
+	input:  "output/{haplo}/{haplo}.tsv"
+	output: "output/{haplo}/{haplo}.tsv.fasta"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""   
+				python scripts/tsv2fasta.py {input} > {output}
+			"""
+
+
+rule sam2tsv:
+	input:	
+			haplotype = "fasta/{haplo}.fa", 
+			bam = "BAM/transcript2{haplo}.bam",
+			d = "fasta/{haplo}.fa.dict"
+	output: "output/{haplo}/{haplo}.tsv"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""   
+				java -jar scripts/sam2tsv.jar -A {input.bam} -r {input.haplotype} > {output}
+			"""
+
+
+rule picard:
+	input:	"fasta/{haplo}.fa",
+			"BAM/transcript2{haplo}.bam.bai"
+	output: "fasta/{haplo}.fa.dict"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""   
+				java -jar  $PICARD_DIR/picard.jar  CreateSequenceDictionary  R={input[0]}  O={output}
+			"""
+
+rule BAMidx:
+	input: "BAM/transcript2{haplo}.bam", 
+	output: "BAM/transcript2{haplo}.bam.bai"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""   
+				samtools index {input}
+			"""
+
+
+rule transcript2Haplotype:
+	input: transcript = config["transcript"],
+			haplotype = "fasta/{haplo}.fa",
+			faidx = "fasta/{haplo}.fa.fai"
+	output: "BAM/transcript2{haplo}.bam"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""   
+				minimap2 -H -ax splice -uf -C5 -f 1000 -N 50 -p 0.5 --eqx -K 100M {input.haplotype} {input.transcript} | samtools view -b -F 2308 - | samtools sort - > {output}
+			"""
+
+
+rule faidx:
+	input: "fasta/{haplo}.fa", 
+	output: "fasta/{haplo}.fa.fai"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""   
+				samtools faidx {input}
+			"""
+ 
+
+rule softlink:
+	input: _getHaplo
+	output: "fasta/{haplo}.fa"
+	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
+	shell:
+			"""   
+				x=`readlink -f {input}`; ln -s ${{x}} {output}
+			"""
+ 
