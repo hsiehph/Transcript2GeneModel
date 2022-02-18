@@ -9,8 +9,8 @@ To run this pipeline,
 
 $ snakemake --drmaa " -V -cwd -w n -e ./log -o ./log {params.sge_opts} -S /bin/bash"  -j 20 -w 60 -s findORF.snake
 
-The predict gene models are listed in the output BED file.
+The predict gene models are listed in the output BED file. </br>
   ./output/<i>haplotypeID</i>/<i>haplotypeID</i>.tsv.ORFs.final.cds.bam.bed
 
-The predict peptide sequences are listed in the output pep file.
+The predict peptide sequences are listed in the output pep file. </br>
   ./output/<i>haplotypeID</i>/<i>haplotypeID</i>.tsv.ORFs.final.pep
