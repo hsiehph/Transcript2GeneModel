@@ -5,16 +5,20 @@ This is a simple snakemake pipeline to predict gene models from genomic DNA (FAS
 
 First, you will need to clone this repo.
 
+```
 $ git clone git@github.com:hsiehph/Transcript2GeneModel.git
+```
 
-The config.yaml must contain correct paths to the files for transcripts and FASTA sequences. </br>
+<br>The config.yaml must contain correct paths to the files for transcripts and FASTA sequences. </br>
 
 To run this pipeline,
-
+```
 $ snakemake --drmaa " -V -cwd -w n -e ./log -o ./log {params.sge_opts} -S /bin/bash"  -j 20 -w 60 -s findORF.snake
+```
+<br>The predict gene models are listed in the output BED file. </br>
 
-The predict gene models are listed in the output BED file. </br>
   ./output/<b><i>haplotypeID</i></b>/<b><i>haplotypeID</i></b>.tsv.ORFs.final.cds.bam.bed
 
 The predict peptide sequences are listed in the output pep file. </br>
+
   ./output/<b><i>haplotypeID</i></b>/<b><i>haplotypeID</i></b>.tsv.ORFs.final.pep
