@@ -9,9 +9,9 @@ First, you will need to clone this repo.
 git clone git@github.com:hsiehph/Transcript2GeneModel.git
 ```
 
-<br>The config.yaml must contain correct paths to the files for transcripts and FASTA sequences. </br>
+**** The config.yaml must contain correct paths to the files for transcripts and FASTA sequences. ****
 
-To run this pipeline,
+<br> To run this pipeline,
 ```
 snakemake --drmaa " -V -cwd -w n -e ./log -o ./log {params.sge_opts} -S /bin/bash"  -j 20 -w 60 -s findORF.snake
 ```
