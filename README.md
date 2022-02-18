@@ -3,6 +3,10 @@ This is a simple snakemake pipeline to predict gene models from genomic DNA (FAS
 
 <b> Note, this pipeline will only work on the Eichler lab cluster due to dependencies </b>
 
+First, you will need to clone this repo.
+
+$ git clone 
+
 The config.yaml must contain correct paths to the files for transcripts and FASTA sequences. </br>
 
 To run this pipeline,
