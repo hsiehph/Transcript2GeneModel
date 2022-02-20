@@ -7,3 +7,4 @@ module load picard/2.26.4
 module load minimap2/2.24
 module load samtools/1.9
 module load bedtools/2.29.2
+PATH=/net/eichler/vol26/home/hsiehph/bin/cdhit/:$PATH

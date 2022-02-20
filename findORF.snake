@@ -55,7 +55,7 @@ rule angel:
 	params: sge_opts="-l h_rt=72:00:00 -l mfree=10G"
 	shell:
 		"""
-			source activate /net/eichler/vol27/projects/human_diversity/nobackups/hsiehph/miniconda/envs/anaCogent  &&  python2 scripts/dumb_predict.py --use_rev_strand  --cpus $(nproc)  --min_aa_length 100  {input}  output/{wildcards.haplo}/{wildcards.haplo}.tsv.ORFs 
+			source activate /net/eichler/vol27/projects/human_diversity/nobackups/hsiehph/miniconda/envs/anaCogent  &&  PATH=/net/eichler/vol26/home/hsiehph/bin/cdhit/:$PATH; python2 scripts/dumb_predict.py --use_rev_strand  --cpus $(nproc)  --min_aa_length 100  {input}  output/{wildcards.haplo}/{wildcards.haplo}.tsv.ORFs 
 		"""
 
 
